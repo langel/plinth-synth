@@ -19,6 +19,10 @@ float curve_inverse(float curve) {
 	return 1.f / curve;
 }
 
+SDL_Texture * texture_create_generic(SDL_Renderer * renderer, int w, int h) {
+	return SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, w, h);
+}
+
 SDL_Texture * texture_from_image(SDL_Renderer * renderer, char * path) {
 	SDL_Surface * surface = IMG_Load(path);
 	if (!surface) {

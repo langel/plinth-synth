@@ -9,15 +9,15 @@ typedef struct {
 	int button_right;
 	int button_x1;
 	int button_x2;
-} mouse_info;
+} mouse_data;
 
 
-mouse_info mouse_init() {
-	mouse_info mouse = { 0 };
+mouse_data mouse_init() {
+	mouse_data mouse = { 0 };
 	return mouse;
 }
 
-void mouse_process(mouse_info * mouse, SDL_Rect * window) {
+void mouse_process(mouse_data * mouse, SDL_Rect * window) {
 	int prev_x = mouse->x;
 	int prev_y = mouse->y;
 	uint32_t buttons = SDL_GetGlobalMouseState(&mouse->x, &mouse->y);
