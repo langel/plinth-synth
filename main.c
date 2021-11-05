@@ -80,13 +80,17 @@ void note_freq_init() {
 
 float lfo_pos;
 
-float osc_pos_last[NOTE_COUNT] = { 0.f };
+float osc_pos_buf0[NOTE_COUNT] = { 0.f };
+float osc_pos_buf1[NOTE_COUNT] = { 0.f };
+float osc_amp_buf[NOTE_COUNT] = { 0.f };
 
 void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length) {
 	float * float_stream = (float*) byte_stream;
 	int float_stream_length = byte_stream_length >> 2;
-	float osc_pos, osc_pos_filtered;
+	float osc_pos;
 	float cutoff_max_distance = 4 * (filter.cutoff / SAMPLE_RATE);
+	float feedback = filter.res + filter.res / (1.f - filter.cutoff);
+	if (feedback < 1.f) feedback = 1.f;
 	for (int i = 0; i < float_stream_length; i += 2) {
 		float output = 0.f;
 		for (int j = 0; j < NOTE_COUNT; j++) {
@@ -97,19 +101,12 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 				note_duty_pos[j] -= note_duty_len[j];
 			}
 			// get current waveform position
-			osc_pos = osc_square(note_duty_pos[j] / note_duty_len[j]);
+			osc_pos = osc_saw(note_duty_pos[j] / note_duty_len[j]);
 			// apply filter
-			osc_pos_filtered = osc_pos;
-			if (osc_pos >= osc_pos_last[j]) {
-				if (osc_pos - osc_pos_last[j] > cutoff_max_distance) osc_pos_filtered = osc_pos_last[j] + cutoff_max_distance;
-			}
-			else {
-				if (osc_pos - osc_pos_last[j] < -cutoff_max_distance) osc_pos_filtered = osc_pos_last[j] - cutoff_max_distance;
-			}
-			osc_pos = osc_pos_last[j] = osc_pos_filtered;
-//			osc_pos = osc_pos_filtered + ((osc_pos - osc_pos_filtered) * filter.res);
-//			osc_pos = osc_pos - osc_pos_filtered;
-//			osc_pos -= (osc_pos * filter.res);
+			//osc_pos_buf0[j] += filter.cutoff * (osc_pos - osc_pos_buf0[j]);
+			osc_pos_buf0[j] += filter.cutoff * (osc_pos - osc_pos_buf0[j] + feedback * (osc_pos_buf0[j] - osc_pos_buf1[j]));
+			osc_pos_buf1[j] += filter.cutoff * (osc_pos_buf0[j] - osc_pos_buf1[j]);
+			osc_pos = osc_pos_buf1[j];
 			// apply adsr
 			int envelope_timer = time_counter - note_trigger_time[j];
 			if (notes_on[j]) {
@@ -126,11 +123,12 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 				else if (envelope_timer >= amp_adsr.decay) {
 					amp = amp_adsr.sustain;
 				}
+				osc_amp_buf[j] = amp;
 			}
 			// note is off or released?
 			else if (!notes_ended[j]) {
 				if (envelope_timer < amp_adsr.release) {
-					amp = (1.f - ((float) envelope_timer / (float) amp_adsr.release)) * amp_adsr.sustain;
+					amp = (1.f - ((float) envelope_timer / (float) amp_adsr.release)) * osc_amp_buf[j];
 				}
 				else notes_ended[j] = 1;
 			}
@@ -173,10 +171,10 @@ knob knobs[KNOB_COUNT] = {
 	{ 0.005f, 25.f, 0.f, 0.f, 0.250f, 2.5f,
 		"RELEASE", { 256, 20, 72, 72 } },
 	// Filter Frequency
-	{ 50.f, SAMPLE_RATE * 0.5f, 0.f, 0.f, 2000.f, 2.5f,
+	{ 0.f, 0.99f, 0.f, 0.f, 0.8f, 2.5f,
 		"CUTOFF", { 400, 20, 72, 72 } },
-	// Resonance
-	{ 0.f, 100.f, 0.f, 0.f, 0.10f, 0.5f,
+	// Filter Resonance
+	{ 0.f, 1.f, 0.f, 0.f, 0.10f, 0.25f,
 		"Q", { 482, 20, 72, 72 } },
 };
 char amp_attack_val_str[6];
@@ -349,13 +347,13 @@ int main(int argc, char* args[]) {
 		SDL_RenderCopy(renderer, amp_release_label_texture, NULL, &amp_release_label_rect);
 
 		filter.cutoff = (knobs[4].val);
-		sprintf(filter_freq_val_str, "%6.1fHz", knobs[4].val);
+		sprintf(filter_freq_val_str, " %4.0fHz", knobs[4].val * (float) SAMPLE_RATE * 0.15f);
 		char_rom_string_to_texture(renderer, filter_freq_val_texture, filter_freq_val_str);
 		SDL_RenderCopy(renderer, filter_freq_val_texture, NULL, &filter_freq_val_rect);
 		SDL_RenderCopy(renderer, filter_freq_label_texture, NULL, &filter_freq_label_rect);
 
-		filter.res = (knobs[5].val * 0.01f);
-		sprintf(filter_q_val_str, "%6.2f%%", knobs[5].val * 0.01f);
+		filter.res = (knobs[5].val);
+		sprintf(filter_q_val_str, "%6.2f%%", knobs[5].val * 100.f);
 		char_rom_string_to_texture(renderer, filter_q_val_texture, filter_q_val_str);
 		SDL_RenderCopy(renderer, filter_q_val_texture, NULL, &filter_q_val_rect);
 		SDL_RenderCopy(renderer, filter_q_label_texture, NULL, &filter_q_label_rect);
