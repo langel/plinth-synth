@@ -88,7 +88,6 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 	float * float_stream = (float*) byte_stream;
 	int float_stream_length = byte_stream_length >> 2;
 	float osc_pos;
-	float cutoff_max_distance = 4 * (filter.cutoff / SAMPLE_RATE);
 	float feedback = filter.res + filter.res / (1.f - filter.cutoff);
 	if (feedback < 1.f) feedback = 1.f;
 	for (int i = 0; i < float_stream_length; i += 2) {
@@ -111,13 +110,15 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 			int envelope_timer = time_counter - note_trigger_time[j];
 			if (notes_on[j]) {
 				// is attack?
-				if (envelope_timer < amp_adsr.attack) {
+				if (envelope_timer <= amp_adsr.attack) {
 					notes_ended[j] = 0;
 					amp = (float) envelope_timer / (float) amp_adsr.attack;
 				}
 				// is decay?
 				else if (envelope_timer < amp_adsr.decay) {
-					amp = ((1.f - amp_adsr.sustain) * (1.f - value_to_range_pos((float) amp_adsr.attack, (float) (amp_adsr.attack + amp_adsr.decay), (float) envelope_timer))) + amp_adsr.sustain;
+					amp = (1.f - amp_adsr.sustain);
+					amp *= 1.f - value_to_range_pos((float) amp_adsr.attack, (float) amp_adsr.decay, (float) envelope_timer);
+					amp += amp_adsr.sustain;
 				}
 				// is sustain?
 				else if (envelope_timer >= amp_adsr.decay) {
@@ -171,7 +172,7 @@ knob knobs[KNOB_COUNT] = {
 	{ 0.005f, 25.f, 0.f, 0.f, 0.250f, 2.5f,
 		"RELEASE", { 256, 20, 72, 72 } },
 	// Filter Frequency
-	{ 0.f, 0.99f, 0.f, 0.f, 0.8f, 2.5f,
+	{ 0.01f, 0.99f, 0.f, 0.f, 0.8f, 2.5f,
 		"CUTOFF", { 400, 20, 72, 72 } },
 	// Filter Resonance
 	{ 0.f, 1.f, 0.f, 0.f, 0.10f, 0.25f,
