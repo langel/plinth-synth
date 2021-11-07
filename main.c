@@ -178,22 +178,22 @@ knob knobs[KNOB_COUNT] = {
 	{ 0.f, 1.f, 0.f, 0.f, 0.10f, 0.25f,
 		"Q", { 482, 20, 72, 72 } },
 };
-char amp_attack_val_str[6];
+char amp_attack_val_str[8];
 SDL_Rect amp_attack_val_rect = { 18, 100, 56, 8 };
 SDL_Rect amp_attack_label_rect = { 18, 8, 56, 8 };
-char amp_decay_val_str[6];
+char amp_decay_val_str[8];
 SDL_Rect amp_decay_val_rect = { 100, 100, 56, 8 };
 SDL_Rect amp_decay_label_rect = { 100, 8, 56, 8 };
-char amp_sustain_val_str[6];
+char amp_sustain_val_str[8];
 SDL_Rect amp_sustain_val_rect = { 182, 100, 56, 8 };
 SDL_Rect amp_sustain_label_rect = { 182, 8, 56, 8 };
-char amp_release_val_str[6];
+char amp_release_val_str[8];
 SDL_Rect amp_release_val_rect = { 264, 100, 56, 8 };
 SDL_Rect amp_release_label_rect = { 264, 8, 56, 8 };
-char filter_freq_val_str[6];
+char filter_freq_val_str[8];
 SDL_Rect filter_freq_val_rect = { 400, 100, 56, 8 };
 SDL_Rect filter_freq_label_rect = { 400, 8, 56, 8 };
-char filter_q_val_str[6];
+char filter_q_val_str[8];
 SDL_Rect filter_q_val_rect = { 482, 100, 56, 8 };
 SDL_Rect filter_q_label_rect = { 482, 8, 56, 8 };
 
