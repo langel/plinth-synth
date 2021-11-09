@@ -90,10 +90,8 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 	float osc_pos;
 	float feedback = filter.res + filter.res / (1.f - filter.cutoff);
 	if (feedback < 1.f) feedback = 1.f;
-
 	for (int i = 0; i < float_stream_length; i += 2) {
 		float output = 0.f;
-
 		for (int j = 0; j < NOTE_COUNT; j++) {
 			float amp = 0.f;
 			// update duty cycle position
@@ -103,13 +101,11 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 			}
 			// get current waveform position
 			osc_pos = osc_saw(note_duty_pos[j] / note_duty_len[j]);
-
 			// apply filter
 			//osc_pos_buf0[j] += filter.cutoff * (osc_pos - osc_pos_buf0[j]);
 			osc_pos_buf0[j] += filter.cutoff * (osc_pos - osc_pos_buf0[j] + feedback * (osc_pos_buf0[j] - osc_pos_buf1[j]));
 			osc_pos_buf1[j] += filter.cutoff * (osc_pos_buf0[j] - osc_pos_buf1[j]);
 			osc_pos = osc_pos_buf1[j];
-
 			// apply adsr
 			int envelope_timer = time_counter - note_trigger_time[j];
 			if (notes_on[j]) {
