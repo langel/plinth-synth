@@ -87,8 +87,10 @@ void note_freq_init() {
 
 float lfo_pos;
 
-float osc_pos_buf0[NOTE_COUNT] = { 0.f };
-float osc_pos_buf1[NOTE_COUNT] = { 0.f };
+float osc_pos_buf0_l[NOTE_COUNT] = { 0.f };
+float osc_pos_buf1_l[NOTE_COUNT] = { 0.f };
+float osc_pos_buf0_r[NOTE_COUNT] = { 0.f };
+float osc_pos_buf1_r[NOTE_COUNT] = { 0.f };
 
 int note_most_recent;
 unsigned long waveform_pos = 0;
@@ -102,6 +104,7 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 	float * float_stream = (float*) byte_stream;
 	int float_stream_length = byte_stream_length >> 2;
 	float osc_pos;
+	float osc_pos_l, osc_pos_r;
 	float feedback = filter.res + filter.res / (1.f - filter.cutoff);
 	if (feedback < 1.f) feedback = 1.f;
 
@@ -112,8 +115,14 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 	int wave_sample_interval = (int) (wave_sample_length / (float) SCOPEX);
 	if (wave_sample_interval < 1) wave_sample_interval = 1;
 
+	float thicc1 = 0.f;
+	float thicc2 = 0.f;
+	float thicc3 = 0.f;
+	float thicc4 = 0.f;
+
 	for (int i = 0; i < float_stream_length; i += 2) {
-		float output = 0.f;
+		float output_l = 0.f;
+		float output_r = 0.f;
 
 		for (int j = 0; j < NOTE_COUNT; j++) {
 			float amp = 0.f;
@@ -121,17 +130,28 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 			note_duty_pos[j] += 1.f;
 			if (note_duty_pos[j] > note_duty_len[j]) {
 				note_duty_pos[j] -= note_duty_len[j];
+				// scope stuff
 				if (note_most_recent == j && waveform_pos >= SCOPEX) {
 					waveform_pos = 0;
 					waveform_sample_pos = 0;
 				}
 			}
 			// get current waveform position
-			osc_pos = osc_saw(note_duty_pos[j] / note_duty_len[j]);
+//			osc_pos = osc_saw(note_duty_pos[j] / note_duty_len[j]);
+			osc_pos = osc_saw(fmodf((float) time_counter, note_duty_len[j]) / note_duty_len[j]);
+			thicc1 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f - thiccness * 0.04f)) / note_duty_len[j]);
+			thicc2 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f + thiccness * 0.004f)) / note_duty_len[j]);
+			thicc3 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f - thiccness * 0.004f)) / note_duty_len[j]);
+			thicc4 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f + thiccness * 0.04f)) / note_duty_len[j]);
+
+			osc_pos_l = (osc_pos + thicc1 + thicc2) / 3.f;
+			osc_pos_r = (osc_pos + thicc3 + thicc4) / 3.f;
 
 			// apply filter
-			osc_pos_buf0[j] += filter.cutoff * (osc_pos - osc_pos_buf0[j] + feedback * (osc_pos_buf0[j] - osc_pos_buf1[j]));
-			osc_pos_buf1[j] += filter.cutoff * (osc_pos_buf0[j] - osc_pos_buf1[j]);
+			osc_pos_buf0_l[j] += filter.cutoff * (osc_pos_l - osc_pos_buf0_l[j] + feedback * (osc_pos_buf0_l[j] - osc_pos_buf1_l[j]));
+			osc_pos_buf1_l[j] += filter.cutoff * (osc_pos_buf0_l[j] - osc_pos_buf1_l[j]);
+			osc_pos_buf0_r[j] += filter.cutoff * (osc_pos_r - osc_pos_buf0_r[j] + feedback * (osc_pos_buf0_r[j] - osc_pos_buf1_r[j]));
+			osc_pos_buf1_r[j] += filter.cutoff * (osc_pos_buf0_r[j] - osc_pos_buf1_r[j]);
 //			osc_pos = osc_pos_buf1[j]; // don't overwrite source
 
 			// apply adsr
@@ -159,22 +179,27 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 			}
 			amp = amp_adsr_pos[j];
 			amp *= amp;
-			output += osc_pos_buf1[j] * amp * volume;
+			output_l += osc_pos_buf1_l[j] * amp;
+			output_r += osc_pos_buf1_r[j] * amp;
 
-			// captoure waveform data for oscilloscope
+			// scope waveform data
 			if (note_most_recent == j) {
 				if (waveform_sample_pos % wave_sample_interval == 0) {
 					if (waveform_pos < SCOPEX) {
-						waveform_clean[waveform_pos] = osc_pos * amp;
-						waveform_filtered[waveform_pos] = osc_pos_buf1[j] * amp;
+						waveform_clean[waveform_pos] = osc_pos_l * amp;
+						waveform_filtered[waveform_pos] = osc_pos_buf1_l[j] * amp;
 					}
 					waveform_pos++;
 				}
 				waveform_sample_pos++;
 			}
 		}
-		float_stream[i] = output;
-		float_stream[i+1] = output;
+		output_l *= volume;
+		if (output_l > 1.f) output_l = 1.f;
+		output_r *= volume;
+		if (output_r > 1.f) output_r = 1.f;
+		float_stream[i] = output_l;
+		float_stream[i+1] = output_r;
 		lfo_pos += 0.00003f;
 		time_counter++;
 	}
@@ -218,7 +243,7 @@ knob knobs[KNOB_COUNT] = {
 	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 1.f,
 		"VOLUME", { 708, 20, 72, 72 } },
 	// Thiccness
-	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 1.f,
+	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 5.f,
 		"THICC", { 708, 152, 72, 72 } },
 };
 char amp_attack_val_str[8];
