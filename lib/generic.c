@@ -19,6 +19,14 @@ float curve_inverse(float curve) {
 	return 1.f / curve;
 }
 
+void renderer_set_color(SDL_Renderer * renderer, SDL_Color * color) {
+	SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);
+}
+
+float sine_to_pos(float sine) {
+	return (sin(sine) * 0.5f) + 0.5f;
+}
+
 SDL_Texture * texture_create_generic(SDL_Renderer * renderer, int w, int h) {
 	return SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, w, h);
 }
@@ -34,14 +42,11 @@ SDL_Texture * texture_from_image(SDL_Renderer * renderer, char * path) {
 	return texture;
 }
 
-float sine_to_pos(float sine) {
-	return (sin(sine) * 0.5f) + 0.5f;
+void texture_set_color_mod(SDL_Texture * texture, SDL_Color * color) {
+	SDL_SetTextureColorMod(texture, color->r, color->g, color->b);
 }
 
 float value_to_range_pos(float min, float max, float val) {
 	return (val - min) / (max - min);
 }
 
-void renderer_set_color(SDL_Renderer * renderer, SDL_Color * color) {
-	SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);
-}
