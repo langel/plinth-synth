@@ -125,6 +125,8 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 		float output_r = 0.f;
 
 		for (int j = 0; j < NOTE_COUNT; j++) {
+			// polyphony optimization!!
+			if (!notes_gate[j] && amp_adsr_pos[j] == 0.f) continue;
 			float amp = 0.f;
 			// update duty cycle position
 			note_duty_pos[j] += 1.f;
