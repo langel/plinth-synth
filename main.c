@@ -147,32 +147,33 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 				}
 			}
 			// get current waveform position
+			/*
 			osc_pos = osc_saw(base_duty_pos[j] / base_duty_len[j]);
 			// do the thiccness
 			float thicc_mod;
 			thicc1_duty_pos[j]++;
-			thicc_mod = base_duty_len[j] * (1.f - thiccness * 0.04f);
+			thicc_mod = base_duty_len[j] * (1.f - thiccness * 0.05f);
 			if (thicc1_duty_pos[j] >= thicc_mod) thicc1_duty_pos[j] -= thicc_mod;
 			thicc1 = osc_saw(thicc1_duty_pos[j] / thicc_mod);
 			thicc2_duty_pos[j]++;
-			thicc_mod = base_duty_len[j] * (1.f + thiccness * 0.004f);
+			thicc_mod = base_duty_len[j] * (1.f + thiccness * 0.005f);
 			if (thicc2_duty_pos[j] >= thicc_mod) thicc2_duty_pos[j] -= thicc_mod;
 			thicc2 = osc_saw(thicc2_duty_pos[j] / thicc_mod);
 			thicc3_duty_pos[j]++;
-			thicc_mod = base_duty_len[j] * (1.f - thiccness * 0.004f);
+			thicc_mod = base_duty_len[j] * (1.f - thiccness * 0.005f);
 			if (thicc3_duty_pos[j] >= thicc_mod) thicc3_duty_pos[j] -= thicc_mod;
 			thicc3 = osc_saw(thicc3_duty_pos[j] / thicc_mod);
 			thicc4_duty_pos[j]++;
-			thicc_mod = base_duty_len[j] * (1.f + thiccness * 0.04f);
+			thicc_mod = base_duty_len[j] * (1.f + thiccness * 0.05f);
 			if (thicc4_duty_pos[j] >= thicc_mod) thicc4_duty_pos[j] -= thicc_mod;
 			thicc4 = osc_saw(thicc4_duty_pos[j] / thicc_mod);
-			/*
-			osc_pos = osc_saw(fmodf((float) time_counter, note_duty_len[j]) / note_duty_len[j]);
-			thicc1 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f - thiccness * 0.04f)) / note_duty_len[j]);
-			thicc2 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f + thiccness * 0.004f)) / note_duty_len[j]);
-			thicc3 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f - thiccness * 0.004f)) / note_duty_len[j]);
-			thicc4 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f + thiccness * 0.04f)) / note_duty_len[j]);
-*/
+			*/
+			osc_pos = osc_saw(fmodf((float) time_counter, base_duty_len[j]) / base_duty_len[j]);
+			thicc1 = osc_saw(fmodf((float) time_counter, base_duty_len[j] * (1.f - thiccness * 0.04f)) / base_duty_len[j]);
+			thicc2 = osc_saw(fmodf((float) time_counter, base_duty_len[j] * (1.f + thiccness * 0.004f)) / base_duty_len[j]);
+			thicc3 = osc_saw(fmodf((float) time_counter, base_duty_len[j] * (1.f - thiccness * 0.004f)) / base_duty_len[j]);
+			thicc4 = osc_saw(fmodf((float) time_counter, base_duty_len[j] * (1.f + thiccness * 0.04f)) / base_duty_len[j]);
+
 			osc_pos_l = (osc_pos + thicc1 + thicc2) / 3.f;
 			osc_pos_r = (osc_pos + thicc3 + thicc4) / 3.f;
 
@@ -272,7 +273,7 @@ knob knobs[KNOB_COUNT] = {
 	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 1.f,
 		"VOLUME", { 708, 20, 72, 72 } },
 	// Thiccness
-	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 1.25f,
+	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 2.125f,
 		"THICC", { 708, 152, 72, 72 } },
 };
 char amp_attack_val_str[8];
