@@ -48,8 +48,12 @@ char accidentals[7] = { 1, 1, 0, 1, 1, 1, 0 };
 int white_keys_to_note[15] = { 0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24 };
 int black_keys_to_note[14] = { 1, 3, -1, 6, 8, 10, -1, 13, 15, -1, 18, 20, 22, -1 };
 float note_freq[NOTE_COUNT];
-float note_duty_len[NOTE_COUNT];
-float note_duty_pos[NOTE_COUNT];
+float base_duty_len[NOTE_COUNT];
+float base_duty_pos[NOTE_COUNT];
+float thicc1_duty_pos[NOTE_COUNT];
+float thicc2_duty_pos[NOTE_COUNT];
+float thicc3_duty_pos[NOTE_COUNT];
+float thicc4_duty_pos[NOTE_COUNT];
 
 typedef struct {
 	float attack;
@@ -76,8 +80,12 @@ void note_freq_init() {
 	int note_offset = -9 - 12;
 	for (int i = 0; i < NOTE_COUNT; i++) {
 		note_freq[i] = FREQ_CENTER * powf(1.059463, note_offset + i);
-		note_duty_len[i] = SAMPLE_RATE / note_freq[i];
-		note_duty_pos[i] = 0.f;
+		base_duty_len[i] = SAMPLE_RATE / note_freq[i];
+		base_duty_pos[i] = 0.f;
+		thicc1_duty_pos[i] = 0.f;
+		thicc2_duty_pos[i] = 0.f;
+		thicc3_duty_pos[i] = 0.f;
+		thicc4_duty_pos[i] = 0.f;
 		notes_gate[i] = 0;
 		amp_adsr_pos[i] = 0.f;
 		amp_adsr_stage[i] = 0;
@@ -129,9 +137,9 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 			if (!notes_gate[j] && amp_adsr_pos[j] == 0.f) continue;
 			float amp = 0.f;
 			// update duty cycle position
-			note_duty_pos[j] += 1.f;
-			if (note_duty_pos[j] > note_duty_len[j]) {
-				note_duty_pos[j] -= note_duty_len[j];
+			base_duty_pos[j] += 1.f;
+			if (base_duty_pos[j] > base_duty_len[j]) {
+				base_duty_pos[j] -= base_duty_len[j];
 				// scope stuff
 				if (note_most_recent == j && waveform_pos >= SCOPEX) {
 					waveform_pos = 0;
@@ -139,13 +147,32 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 				}
 			}
 			// get current waveform position
-//			osc_pos = osc_saw(note_duty_pos[j] / note_duty_len[j]);
+			osc_pos = osc_saw(base_duty_pos[j] / base_duty_len[j]);
+			// do the thiccness
+			float thicc_mod;
+			thicc1_duty_pos[j]++;
+			thicc_mod = base_duty_len[j] * (1.f - thiccness * 0.04f);
+			if (thicc1_duty_pos[j] >= thicc_mod) thicc1_duty_pos[j] -= thicc_mod;
+			thicc1 = osc_saw(thicc1_duty_pos[j] / thicc_mod);
+			thicc2_duty_pos[j]++;
+			thicc_mod = base_duty_len[j] * (1.f + thiccness * 0.004f);
+			if (thicc2_duty_pos[j] >= thicc_mod) thicc2_duty_pos[j] -= thicc_mod;
+			thicc2 = osc_saw(thicc2_duty_pos[j] / thicc_mod);
+			thicc3_duty_pos[j]++;
+			thicc_mod = base_duty_len[j] * (1.f - thiccness * 0.004f);
+			if (thicc3_duty_pos[j] >= thicc_mod) thicc3_duty_pos[j] -= thicc_mod;
+			thicc3 = osc_saw(thicc3_duty_pos[j] / thicc_mod);
+			thicc4_duty_pos[j]++;
+			thicc_mod = base_duty_len[j] * (1.f + thiccness * 0.04f);
+			if (thicc4_duty_pos[j] >= thicc_mod) thicc4_duty_pos[j] -= thicc_mod;
+			thicc4 = osc_saw(thicc4_duty_pos[j] / thicc_mod);
+			/*
 			osc_pos = osc_saw(fmodf((float) time_counter, note_duty_len[j]) / note_duty_len[j]);
 			thicc1 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f - thiccness * 0.04f)) / note_duty_len[j]);
 			thicc2 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f + thiccness * 0.004f)) / note_duty_len[j]);
 			thicc3 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f - thiccness * 0.004f)) / note_duty_len[j]);
 			thicc4 = osc_saw(fmodf((float) time_counter, note_duty_len[j] * (1.f + thiccness * 0.04f)) / note_duty_len[j]);
-
+*/
 			osc_pos_l = (osc_pos + thicc1 + thicc2) / 3.f;
 			osc_pos_r = (osc_pos + thicc3 + thicc4) / 3.f;
 
@@ -245,7 +272,7 @@ knob knobs[KNOB_COUNT] = {
 	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 1.f,
 		"VOLUME", { 708, 20, 72, 72 } },
 	// Thiccness
-	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 5.f,
+	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 1.25f,
 		"THICC", { 708, 152, 72, 72 } },
 };
 char amp_attack_val_str[8];
