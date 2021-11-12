@@ -48,7 +48,7 @@ void musical_keyboard_init() {
 void musical_keyboard_draw(SDL_Renderer * renderer) {
 	keys_mouse_hover = 0;
 	keyboard_rect.w = window_rect.w;
-	keyboard_rect.h = window_rect.h / 2;
+	keyboard_rect.h = window_rect.h / 4;
 	keyboard_rect.y = window_rect.h / 2;
 	// white keys
 	keys_white_rect.w = (keyboard_rect.w - (15 * KEY_MARGIN) - 20) / 15;

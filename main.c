@@ -9,7 +9,6 @@
 #define SAMPLE_RATE 32000
 #define KEY_MARGIN 5
 
-int keys_pressed[256];
 
 unsigned long time_counter = 0;
 int notes_gate[NOTE_COUNT];
@@ -25,6 +24,7 @@ float thicc4_duty_pos[NOTE_COUNT];
 #include "src/window.c"
 #include "src/mouse.c"
 #include "src/palette.c"
+#include "src/cornputer_keyboard.c"
 #include "src/musical_keyboard.c"
 
 typedef struct {
@@ -149,6 +149,7 @@ int main(int argc, char* args[]) {
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
 	musical_keyboard_init();
+	//keys_debug = 1;
 
 	// char rom initialization
 	char_rom_load_set(renderer, char_rom_eagle_pc_cga);
@@ -365,32 +366,17 @@ int main(int argc, char* args[]) {
 		else {
 			SDL_RenderCopy(renderer, mouse_pointer, NULL, &mouse_cursor_rect);
 		}
+
 		SDL_RenderPresent(renderer);
 
 
 		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-				case SDL_QUIT:
-					running = 0;
-					break;
-				case SDL_KEYDOWN:
-					if (keys_pressed[event.key.keysym.scancode] == 0) {
-						keys_pressed[event.key.keysym.scancode] = 1;
-		//				printf( "keydown: %8s %3d\n", SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.scancode);
-					}
-					switch (event.key.keysym.sym) {
-						case SDLK_ESCAPE:
-							running = 0;
-							break;
-					}
-					break;
-				case SDL_KEYUP:
-					keys_pressed[event.key.keysym.scancode] = 0;
-		//			printf( "  keyup: %8s %3d\n", SDL_GetKeyName(event.key.keysym.sym), event.key.keysym.scancode);
-				case SDL_WINDOWEVENT:
-					window_event_process(event);
-					break;
+			if (event.type == SDL_QUIT || 
+			(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
+				running = 0;
 			}
+			cornputer_keyboard_event_process(event);
+			window_event_process(event);
 		}
 	}
 

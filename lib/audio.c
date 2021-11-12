@@ -25,7 +25,7 @@ void audio_init(int sample_rate, int channels, int buffer_sample_count, SDL_Audi
 	audio_spec.channels = channels;
 	audio_spec.samples = buffer_sample_count;
 	audio_spec.callback = callback;
-	audio_device = SDL_OpenAudioDevice(NULL, 0, &audio_spec, &audio_actual, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+	audio_device = SDL_OpenAudioDevice(NULL, 0, &audio_spec, &audio_actual, 0);
 	if (audio_device == 0) {
 		SDL_Log("Failed to open audio: %s\n", SDL_GetError());
 		audio_spec_log(&audio_spec);

@@ -46,7 +46,6 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 				}
 			}
 			// get current waveform position
-			/*
 			osc_pos = osc_saw(base_duty_pos[j] / base_duty_len[j]);
 			// do the thiccness
 			float thicc_mod;
@@ -66,12 +65,13 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 			thicc_mod = base_duty_len[j] * (1.f + thiccness * 0.05f);
 			if (thicc4_duty_pos[j] >= thicc_mod) thicc4_duty_pos[j] -= thicc_mod;
 			thicc4 = osc_saw(thicc4_duty_pos[j] / thicc_mod);
-			*/
+			/*
 			osc_pos = osc_saw(fmodf((float) time_counter, base_duty_len[j]) / base_duty_len[j]);
 			thicc1 = osc_saw(fmodf((float) time_counter, base_duty_len[j] * (1.f - thiccness * 0.04f)) / base_duty_len[j]);
 			thicc2 = osc_saw(fmodf((float) time_counter, base_duty_len[j] * (1.f + thiccness * 0.004f)) / base_duty_len[j]);
 			thicc3 = osc_saw(fmodf((float) time_counter, base_duty_len[j] * (1.f - thiccness * 0.004f)) / base_duty_len[j]);
 			thicc4 = osc_saw(fmodf((float) time_counter, base_duty_len[j] * (1.f + thiccness * 0.04f)) / base_duty_len[j]);
+			*/
 
 			osc_pos_l = (osc_pos + thicc1 + thicc2) / 3.f;
 			osc_pos_r = (osc_pos + thicc3 + thicc4) / 3.f;
