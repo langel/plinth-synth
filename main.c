@@ -9,7 +9,7 @@
 #define SAMPLE_RATE 32000
 #define KEY_MARGIN 5
 // note A below middle C minus octave(s)
-#define BASE_NOTE -9 - 12 
+#define BASE_NOTE -9 - 12
 
 unsigned long time_counter = 0;
 

@@ -63,11 +63,28 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 			voices[j].thicc4.phase += voices[j].thicc4.inc;
 			if (voices[j].thicc4.phase > 1.f) voices[j].thicc4.phase -= 1.f;
 
-			base = osc_saw(voices[j].base.phase);
+/*
+			base   = osc_saw(voices[j].base.phase);
 			thicc1 = osc_saw(voices[j].thicc1.phase);
 			thicc2 = osc_saw(voices[j].thicc2.phase);
 			thicc3 = osc_saw(voices[j].thicc3.phase);
 			thicc4 = osc_saw(voices[j].thicc4.phase);
+			base   = osc_saw_blep(voices[j].base.phase, voices[j].base.inc);
+			thicc1 = osc_saw_blep(voices[j].thicc1.phase, voices[j].thicc1.inc);
+			thicc2 = osc_saw_blep(voices[j].thicc2.phase, voices[j].thicc2.inc);
+			thicc3 = osc_saw_blep(voices[j].thicc3.phase, voices[j].thicc3.inc);
+			thicc4 = osc_saw_blep(voices[j].thicc4.phase, voices[j].thicc4.inc);
+			base   = osc_square_blep(voices[j].base.phase, voices[j].base.inc);
+			thicc1 = osc_square_blep(voices[j].thicc1.phase, voices[j].thicc1.inc);
+			thicc2 = osc_square_blep(voices[j].thicc2.phase, voices[j].thicc2.inc);
+			thicc3 = osc_square_blep(voices[j].thicc3.phase, voices[j].thicc3.inc);
+			thicc4 = osc_square_blep(voices[j].thicc4.phase, voices[j].thicc4.inc);
+			*/
+			base   = osc_triangle_blep(voices[j].base.phase, voices[j].base.inc);
+			thicc1 = osc_triangle_blep(voices[j].thicc1.phase, voices[j].thicc1.inc);
+			thicc2 = osc_triangle_blep(voices[j].thicc2.phase, voices[j].thicc2.inc);
+			thicc3 = osc_triangle_blep(voices[j].thicc3.phase, voices[j].thicc3.inc);
+			thicc4 = osc_triangle_blep(voices[j].thicc4.phase, voices[j].thicc4.inc);
 
 			osc_pos_l = (base + thicc1 + thicc2) / 3.f;
 			osc_pos_r = (base + thicc3 + thicc4) / 3.f;
