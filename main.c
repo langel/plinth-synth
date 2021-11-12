@@ -8,24 +8,10 @@
 #define FREQ_CENTER 440
 #define SAMPLE_RATE 32000
 #define KEY_MARGIN 5
-
+// note A below middle C minus octave(s)
+#define BASE_NOTE -9 - 12 
 
 unsigned long time_counter = 0;
-int notes_gate[NOTE_COUNT];
-
-float note_freq[NOTE_COUNT];
-float base_duty_len[NOTE_COUNT];
-float base_duty_pos[NOTE_COUNT];
-float thicc1_duty_pos[NOTE_COUNT];
-float thicc2_duty_pos[NOTE_COUNT];
-float thicc3_duty_pos[NOTE_COUNT];
-float thicc4_duty_pos[NOTE_COUNT];
-
-#include "src/window.c"
-#include "src/mouse.c"
-#include "src/palette.c"
-#include "src/cornputer_keyboard.c"
-#include "src/musical_keyboard.c"
 
 typedef struct {
 	float attack;
@@ -37,6 +23,14 @@ adsr_envelope amp_adsr;
 float amp_adsr_pos[NOTE_COUNT];
 float amp_adsr_release[NOTE_COUNT];
 int amp_adsr_stage[NOTE_COUNT];
+
+#include "src/window.c"
+#include "src/mouse.c"
+#include "src/palette.c"
+#include "src/voice.c"
+#include "src/cornputer_keyboard.c"
+#include "src/musical_keyboard.c"
+
 adsr_envelope filter_adsr;
 
 typedef struct {
@@ -47,23 +41,6 @@ filter_data filter;
 
 float volume;
 float thiccness;
-
-void note_freq_init() {
-	int note_offset = -9 - 12;
-	for (int i = 0; i < NOTE_COUNT; i++) {
-		note_freq[i] = FREQ_CENTER * powf(1.059463, note_offset + i);
-		base_duty_len[i] = SAMPLE_RATE / note_freq[i];
-		base_duty_pos[i] = 0.f;
-		thicc1_duty_pos[i] = 0.f;
-		thicc2_duty_pos[i] = 0.f;
-		thicc3_duty_pos[i] = 0.f;
-		thicc4_duty_pos[i] = 0.f;
-		notes_gate[i] = 0;
-		amp_adsr_pos[i] = 0.f;
-		amp_adsr_stage[i] = 0;
-		//printf("note id: %3d    note freq: %12.8f    note duty: %12.8f \n", i, note_freq[i], note_duty_len[i]);
-	}
-}
 
 float lfo_pos;
 
@@ -140,7 +117,7 @@ void notes_update() {
 int main(int argc, char* args[]) {
 
 	SDL_Init(SDL_INIT_EVERYTHING);
-	note_freq_init(); 
+	voice_freq_init(); 
 	audio_init(SAMPLE_RATE, 2, 1024, AUDIO_F32SYS, &audio_callback);
 
 	SDL_Event event;
@@ -240,18 +217,18 @@ int main(int argc, char* args[]) {
 		// note handling (cornputer keybaord and mouse)
 		for (int i = 0; i < NOTE_COUNT; i++) {
 			if (keys_pressed[note_to_scancode[i]] || (!mouse_knob_grab && keys_mouse_hover && mouse.button_left && keys_mouse_target == i && window_has_focus)) {
-				if (notes_gate[i] == 0) {
+				if (voices[i].gate == 0) {
 					amp_adsr_stage[i] = 0;
 					note_most_recent = i;
 				}
-				notes_gate[i] = 1;
+				voices[i].gate = 1;
 			}
 			else {
-				if (notes_gate[i] == 1) {
+				if (voices[i].gate == 1) {
 					amp_adsr_stage[i] = 3;
 				}
 				amp_adsr_release[i] = 1.f / (amp_adsr.release * (float) SAMPLE_RATE);
-				notes_gate[i] = 0;
+				voices[i].gate = 0;
 			}
 		}
 

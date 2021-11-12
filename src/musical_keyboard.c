@@ -56,7 +56,7 @@ void musical_keyboard_draw(SDL_Renderer * renderer) {
 	keys_white_rect.x = 10;
 	keys_white_rect.y = keyboard_rect.y;
 	for (int i = 0; i < 15; i++) {
-		if (notes_gate[white_keys_to_note[i]]) {
+		if (voices[white_keys_to_note[i]].gate) {
 			renderer_set_color(renderer, &palette[2]); 
 		}
 		else {
@@ -75,7 +75,7 @@ void musical_keyboard_draw(SDL_Renderer * renderer) {
 	keys_black_rect.y = keyboard_rect.y;
 	for (int i = 0; i < 14; i++) {
 		if (accidentals[i % 7]) {
-			if (notes_gate[black_keys_to_note[i]]) {
+			if (voices[black_keys_to_note[i]].gate) {
 				renderer_set_color(renderer, &palette[2]); 
 			}
 			else {
