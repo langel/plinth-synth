@@ -135,6 +135,7 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 				waveform_sample_pos++;
 			}
 		}
+
 		output_l *= volume;
 		if (output_l > 1.f) output_l = 1.f;
 		output_r *= volume;
