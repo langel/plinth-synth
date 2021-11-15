@@ -30,6 +30,7 @@ int amp_adsr_stage[NOTE_COUNT];
 #include "src/voice.c"
 #include "src/cornputer_keyboard.c"
 #include "src/musical_keyboard.c"
+#include "src/scope.c"
 
 adsr_envelope filter_adsr;
 
@@ -43,15 +44,7 @@ float volume;
 float thiccness;
 
 float lfo_pos;
-
 int note_most_recent;
-unsigned long waveform_pos = 0;
-unsigned long waveform_sample_pos = 0;
-#define SCOPEX 420
-#define SCOPEY 100
-float waveform_clean[SCOPEX] = { 0.f };
-float waveform_filtered[SCOPEX] = { 0.f };
-
 
 #include "src/audio_callback.c"
 
@@ -108,10 +101,6 @@ char thiccness_val_str[8];
 SDL_Rect thiccness_val_rect = { 716, 228, 56, 8 };
 SDL_Rect thiccness_label_rect = { 716, 136, 56, 8 };
 
-void notes_update() {
-	for (int i = 0; i < NOTE_COUNT; i++) {
-	}
-}
 
 
 int main(int argc, char* args[]) {
@@ -126,6 +115,8 @@ int main(int argc, char* args[]) {
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
 	musical_keyboard_init();
+	scope_init(renderer);
+
 	//keys_debug = 1;
 
 	// char rom initialization
@@ -207,13 +198,6 @@ int main(int argc, char* args[]) {
 	renderer_set_color(renderer, &palette[7]);
 	SDL_RenderClear(renderer);
 	SDL_SetRenderTarget(renderer, NULL);
-
-	// waveform texture
-	SDL_Texture * waveform_texture = texture_create_generic(renderer, SCOPEX, SCOPEY);
-	SDL_Rect waveform_rect = { 20, 156, SCOPEX, SCOPEY };
-	SDL_Texture * wavebrush_texture = texture_from_image(renderer, "assets/brush.png");
-	SDL_SetTextureBlendMode(wavebrush_texture, SDL_BLENDMODE_ADD);
-	SDL_Rect wavebrush_rect = { 0, 0, 4, 4 };
 
 	// mouse cursor
 	mouse_data mouse = mouse_init();
@@ -346,30 +330,7 @@ int main(int argc, char* args[]) {
 		SDL_RenderCopy(renderer, osc_options_texture, NULL, &option_dest);
 
 		// waveform draw
-		SDL_SetRenderTarget(renderer, waveform_texture);
-		renderer_set_color(renderer, &palette[7]);
-		SDL_RenderClear(renderer);
-		float waveform_y_scale = (float) SCOPEY * 0.4f;
-		int waveform_y_offset = SCOPEY * 0.5 - 2;
-		for (int x = 0; x < SCOPEX - 1; x++) {
-			renderer_set_color(renderer, &palette[3]);
-			SDL_RenderDrawLine(renderer, x, (int) (waveform_clean[x] * waveform_y_scale) + waveform_y_offset, x + 1, (int) (waveform_clean[x + 1] * waveform_y_scale) + waveform_y_offset);
-			renderer_set_color(renderer, &palette[4]);
-			SDL_RenderDrawLine(renderer, x, (int) (waveform_filtered[x] * waveform_y_scale) + waveform_y_offset, x + 1, (int) (waveform_filtered[x + 1] * waveform_y_scale) + waveform_y_offset);
-		}
-		for (int i = 0; i < SCOPEX; i++) {
-			wavebrush_rect.x = i - 2;
-			// clean
-			wavebrush_rect.y = (int) (waveform_clean[i] * waveform_y_scale) + waveform_y_offset;
-			texture_set_color_mod(wavebrush_texture, &palette[3]);
-			SDL_RenderCopy(renderer, wavebrush_texture, NULL, &wavebrush_rect);
-			// filtered
-			wavebrush_rect.y = (int) (waveform_filtered[i] * waveform_y_scale) + waveform_y_offset;
-			texture_set_color_mod(wavebrush_texture, &palette[4]);
-			SDL_RenderCopy(renderer, wavebrush_texture, NULL, &wavebrush_rect);
-		}
-		SDL_SetRenderTarget(renderer, NULL);
-		SDL_RenderCopy(renderer, waveform_texture, NULL, &waveform_rect);
+		scope_draw(renderer);
 
 		// process musical keyboard
 		musical_keyboard_draw(renderer);

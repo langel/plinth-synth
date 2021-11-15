@@ -48,9 +48,9 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 			if (voices[j].base.phase > 1.f) {
 				voices[j].base.phase -= 1.f;
 				// scope stuff
-				if (note_most_recent == j && waveform_pos >= SCOPEX) {
-					waveform_pos = 0;
-					waveform_sample_pos = 0;
+				if (note_most_recent == j && scope_pos >= SCOPEX) {
+					scope_pos = 0;
+					scope_sample_pos = 0;
 				}
 			}
 			voices[j].thicc1.phase += voices[j].thicc1.inc;
@@ -193,14 +193,15 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 
 			// scope waveform data
 			if (note_most_recent == j) {
-				if (waveform_sample_pos % wave_sample_interval == 0) {
-					if (waveform_pos < SCOPEX) {
-						waveform_clean[waveform_pos] = osc_pos_l * amp;
-						waveform_filtered[waveform_pos] = osc_pos_buf1_l[j] * amp;
+				if (scope_sample_pos % wave_sample_interval == 0) {
+					if (scope_pos < SCOPEX) {
+						// invert y value for grafx
+						scope_clean[scope_pos] = -osc_pos_l * amp;
+						scope_filtered[scope_pos] = -osc_pos_buf1_l[j] * amp;
 					}
-					waveform_pos++;
+					scope_pos++;
 				}
-				waveform_sample_pos++;
+				scope_sample_pos++;
 			}
 		}
 
