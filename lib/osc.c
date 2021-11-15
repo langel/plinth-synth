@@ -81,13 +81,18 @@ float osc_noise_pink_stacked() {
 	return (o1 + o2 + o3 + o4 + o5 + o6 + o7 + o8) * 0.125;
 }
 
-float osc_noise_pitched(float phase, float inc) {
-	static float b = -1.f;
+float osc_noise_pitched(float phase, float inc, int * state) {
+	// XXX blep is not doing predictive work at end of phase here
 	if (phase < inc) {
-		float white = osc_noise_white();
-		if (osc_noise_white() > 0.f) b = -b;
+		if (osc_noise_white() > 0.f) {
+			*state = -(*state);
+			if (*state == 1) {
+				return (float) *state + osc_helper_blep(phase, inc);
+			}
+			else return (float) *state - osc_helper_blep(phase, inc);
+		}
 	}
-	return b;
+	return (float) *state;
 }
 
 float osc_noise_popcorn() {

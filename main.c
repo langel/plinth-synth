@@ -6,10 +6,10 @@
 
 #define NOTE_COUNT 25
 #define FREQ_CENTER 440
-#define SAMPLE_RATE 48000
+#define SAMPLE_RATE 32000
 #define KEY_MARGIN 5
 // note A below middle C minus octave(s)
-#define BASE_NOTE -9 + 24
+#define BASE_NOTE -9 - 12
 
 unsigned long time_counter = 0;
 
@@ -179,6 +179,35 @@ int main(int argc, char* args[]) {
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	for (int i = 0; i < KNOB_COUNT; i++) knob_init(&knobs[i]);
 
+	// oscillator options texture
+	int osc_option_texture_width = 15 * 8;
+	int osc_option_texture_height = 13 * 8;
+	SDL_Texture * osc_option_temp_texture = texture_create_generic(renderer, osc_option_texture_width, 8);
+	SDL_SetTextureBlendMode(osc_option_temp_texture, SDL_BLENDMODE_BLEND);
+	SDL_Rect option_dest = { 0, 0, osc_option_texture_width, 8 };
+	SDL_Texture * osc_options_texture = texture_create_generic(renderer, osc_option_texture_width, osc_option_texture_height);
+	SDL_SetTextureBlendMode(osc_options_texture, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderTarget(renderer, osc_options_texture);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	SDL_RenderClear(renderer);
+	for (int i = 0; i < 13; i++) {
+		char_rom_string_to_texture(renderer, osc_option_temp_texture, osc_options[i]);
+		SDL_SetRenderTarget(renderer, osc_options_texture);
+		SDL_RenderCopy(renderer, osc_option_temp_texture, NULL, &option_dest);
+		option_dest.y += 8;
+	}
+	option_dest.w = osc_option_texture_width;
+	option_dest.h = osc_option_texture_height;
+	option_dest.x = 500;
+	option_dest.y = 156;
+	// oscillator option selected texture
+	SDL_Texture * osc_option_select_texture = texture_create_generic(renderer, osc_option_texture_width, 8);
+	SDL_Rect osc_option_select_rect = { option_dest.x, option_dest.y, option_dest.w, 8 };
+	SDL_SetRenderTarget(renderer, osc_option_select_texture);
+	renderer_set_color(renderer, &palette[7]);
+	SDL_RenderClear(renderer);
+	SDL_SetRenderTarget(renderer, NULL);
+
 	// waveform texture
 	SDL_Texture * waveform_texture = texture_create_generic(renderer, SCOPEX, SCOPEY);
 	SDL_Rect waveform_rect = { 20, 156, SCOPEX, SCOPEY };
@@ -191,6 +220,7 @@ int main(int argc, char* args[]) {
 	int mouse_knob_grab = 0;
 	int mouse_knob_hover = 0;
 	int mouse_knob_target = 0; // knob id of grabbed knob
+	int mouse_osc_select_hover = 0;
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_Texture * mouse_hand_closed = texture_from_image(renderer, "assets/cursor_hand_closed.png");
 	SDL_Texture * mouse_hand_1_finger = texture_from_image(renderer, "assets/cursor_hand_1_finger.png");
@@ -233,8 +263,9 @@ int main(int argc, char* args[]) {
 		}
 
 
-		// process knobs
+		// mouse gui stuff
 		mouse_knob_hover = 0;
+		mouse_osc_select_hover = 0;
 		for (int i = 0; i < KNOB_COUNT; i++) {
 			SDL_RenderCopyEx(renderer, knob_texture, NULL, &knobs[i].rect, knobs[i].rot, NULL, SDL_FLIP_NONE);
 			if (collision_detection(knobs[i].rect, mouse_hotspot)) {
@@ -250,6 +281,14 @@ int main(int argc, char* args[]) {
 			//printf("attack: %6.3f  decay: %6.3f  sustain: %6.3f  release: %6.3f\n", knobs[0].val, knobs[1].val, knobs[2].val, knobs[3].val);
 			//printf("attack: %6d  decay: %6d  sustain: %6.3f  release: %6d\n", amp_adsr.attack, amp_adsr.decay, amp_adsr.sustain, amp_adsr.release);
 		}
+		else if (collision_detection(option_dest, mouse_hotspot)) {
+			mouse_osc_select_hover = 1;
+			if (mouse.button_left) {
+				osc_option_selected = (mouse_hotspot.y - option_dest.y) / 8;
+			}
+		}
+
+		// process/draw  knobs, labels and values
 		// set text color to yellow
 		char_rom_set_color(&palette[1]);
 
@@ -301,6 +340,11 @@ int main(int argc, char* args[]) {
 		SDL_RenderCopy(renderer, thiccness_val_texture, NULL, &thiccness_val_rect);
 		SDL_RenderCopy(renderer, thiccness_label_texture, NULL, &thiccness_label_rect);
 
+		// oscillator options
+		osc_option_select_rect.y = option_dest.y + osc_option_selected * 8;
+		SDL_RenderCopy(renderer, osc_option_select_texture, NULL, &osc_option_select_rect);
+		SDL_RenderCopy(renderer, osc_options_texture, NULL, &option_dest);
+
 		// waveform draw
 		SDL_SetRenderTarget(renderer, waveform_texture);
 		renderer_set_color(renderer, &palette[7]);
@@ -337,7 +381,7 @@ int main(int argc, char* args[]) {
 		else if (mouse_knob_hover) {
 			SDL_RenderCopy(renderer, mouse_hand_open, NULL, &mouse_cursor_rect);
 		}
-		else if (keys_mouse_hover) {
+		else if (keys_mouse_hover || mouse_osc_select_hover) {
 			SDL_RenderCopy(renderer, mouse_hand_1_finger, NULL, &mouse_cursor_rect);
 		}
 		else {

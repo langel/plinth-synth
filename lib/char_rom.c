@@ -47,6 +47,5 @@ void char_rom_string_to_texture(SDL_Renderer * renderer, SDL_Texture * target, c
 		dest.x += 8;
 	}
 	SDL_SetRenderTarget(renderer, stashed_texture);
-	SDL_DestroyTexture(stashed_texture);
 }
 

@@ -14,11 +14,29 @@ typedef struct {
 	int gate;
 	int adsr_stage;
 	float adsr_pos;
+	int osc_state[5];
 } voice;
 
 
 voice voices[NOTE_COUNT];
 
+
+char osc_options[13][16] = {
+	"saw raw",
+	"saw blep",
+	"saw 3sine",
+	"saw 6sine",
+	"saw 9sine",
+	"square raw",
+	"square blep",
+	"square 3sine",
+	"square 6sine",
+	"square 9sine",
+	"tri raw",
+	"tri blep",
+	"noise pitched",
+};
+char osc_option_selected = 1;
 
 
 void voice_freq_init() {
@@ -38,6 +56,9 @@ void voice_freq_init() {
 		voices[i].thicc3.inc = note_inc;
 		voices[i].thicc4.phase = 0.f;
 		voices[i].thicc4.inc = note_inc;
+		for (int j = 0; j < 5; j++) {
+			voices[i].osc_state[j] = 1;
+		}
 
 		// XXX the olds
 		amp_adsr_pos[i] = 0.f;
