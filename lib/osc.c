@@ -26,14 +26,6 @@ float osc_noise_brown() {
 	return b;
 }
 
-float osc_noise_popcorn() {
-	// aka impulse / bi-stable / burst / random telegraph noise
-	static float b = -0.95f;
-	float white = osc_noise_white();
-	if (white > 0.95) b = -b;
-	return b + white * 0.05f;
-}
-
 float osc_noise_pink_filtered() {
 	// pink noise algorithms from https://www.firstpr.com.au/dsp/pink-noise/
 	static float b0 = 0.f;
@@ -87,6 +79,23 @@ float osc_noise_pink_stacked() {
 	else if (counter & 0x80) o8 = osc_noise_white();
 	counter++;
 	return (o1 + o2 + o3 + o4 + o5 + o6 + o7 + o8) * 0.125;
+}
+
+float osc_noise_pitched(float phase, float inc) {
+	static float b = -1.f;
+	if (phase < inc) {
+		float white = osc_noise_white();
+		if (osc_noise_white() > 0.f) b = -b;
+	}
+	return b;
+}
+
+float osc_noise_popcorn() {
+	// aka impulse / bi-stable / burst / random telegraph noise
+	static float b = -0.95f;
+	float white = osc_noise_white();
+	if (white > 0.95) b = -b;
+	return b + white * 0.05f;
 }
 
 float osc_pulse(float phase, float width) {
