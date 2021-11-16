@@ -10,3 +10,6 @@ build:
 	-lSDL2_ttf \
 	-lSDL2_image \
 	-o main.exe
+
+#	disables command prompt window 
+#	-mwindows \

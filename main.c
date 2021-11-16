@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#define DEBUG 0
+#define DEBUG 1
 #include "lib/core.c"
 
 #define NOTE_COUNT 25
