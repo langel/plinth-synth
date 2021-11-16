@@ -31,6 +31,7 @@ int amp_adsr_stage[NOTE_COUNT];
 #include "src/cornputer_keyboard.c"
 #include "src/musical_keyboard.c"
 #include "src/scope.c"
+#include "src/osc_options.c"
 
 adsr_envelope filter_adsr;
 
@@ -114,13 +115,15 @@ int main(int argc, char* args[]) {
 	window_init();
 	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
+	// char rom initialization
+	char_rom_load_set(renderer, char_rom_eagle_pc_cga);
+
 	musical_keyboard_init();
+	osc_options_init(renderer);
 	scope_init(renderer);
 
 	//keys_debug = 1;
 
-	// char rom initialization
-	char_rom_load_set(renderer, char_rom_eagle_pc_cga);
 	char_rom_set_color(&palette[0]); // white text
 	
 	// knob labels and val fields
@@ -169,35 +172,6 @@ int main(int argc, char* args[]) {
 	SDL_Texture * knob_texture = texture_from_image(renderer, "assets/knob2-smaller.png");
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	for (int i = 0; i < KNOB_COUNT; i++) knob_init(&knobs[i]);
-
-	// oscillator options texture
-	int osc_option_texture_width = 15 * 8;
-	int osc_option_texture_height = 13 * 8;
-	SDL_Texture * osc_option_temp_texture = texture_create_generic(renderer, osc_option_texture_width, 8);
-	SDL_SetTextureBlendMode(osc_option_temp_texture, SDL_BLENDMODE_BLEND);
-	SDL_Rect option_dest = { 0, 0, osc_option_texture_width, 8 };
-	SDL_Texture * osc_options_texture = texture_create_generic(renderer, osc_option_texture_width, osc_option_texture_height);
-	SDL_SetTextureBlendMode(osc_options_texture, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderTarget(renderer, osc_options_texture);
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-	SDL_RenderClear(renderer);
-	for (int i = 0; i < 13; i++) {
-		char_rom_string_to_texture(renderer, osc_option_temp_texture, osc_options[i]);
-		SDL_SetRenderTarget(renderer, osc_options_texture);
-		SDL_RenderCopy(renderer, osc_option_temp_texture, NULL, &option_dest);
-		option_dest.y += 8;
-	}
-	option_dest.w = osc_option_texture_width;
-	option_dest.h = osc_option_texture_height;
-	option_dest.x = 500;
-	option_dest.y = 156;
-	// oscillator option selected texture
-	SDL_Texture * osc_option_select_texture = texture_create_generic(renderer, osc_option_texture_width, 8);
-	SDL_Rect osc_option_select_rect = { option_dest.x, option_dest.y, option_dest.w, 8 };
-	SDL_SetRenderTarget(renderer, osc_option_select_texture);
-	renderer_set_color(renderer, &palette[7]);
-	SDL_RenderClear(renderer);
-	SDL_SetRenderTarget(renderer, NULL);
 
 	// mouse cursor
 	mouse_data mouse = mouse_init();
@@ -265,10 +239,10 @@ int main(int argc, char* args[]) {
 			//printf("attack: %6.3f  decay: %6.3f  sustain: %6.3f  release: %6.3f\n", knobs[0].val, knobs[1].val, knobs[2].val, knobs[3].val);
 			//printf("attack: %6d  decay: %6d  sustain: %6.3f  release: %6d\n", amp_adsr.attack, amp_adsr.decay, amp_adsr.sustain, amp_adsr.release);
 		}
-		else if (collision_detection(option_dest, mouse_hotspot)) {
+		else if (collision_detection(osc_options_rect, mouse_hotspot)) {
 			mouse_osc_select_hover = 1;
 			if (mouse.button_left) {
-				osc_option_selected = (mouse_hotspot.y - option_dest.y) / 8;
+				osc_option_selected = (mouse_hotspot.y - osc_options_rect.y + 3) / 8;
 			}
 		}
 
@@ -324,16 +298,10 @@ int main(int argc, char* args[]) {
 		SDL_RenderCopy(renderer, thiccness_val_texture, NULL, &thiccness_val_rect);
 		SDL_RenderCopy(renderer, thiccness_label_texture, NULL, &thiccness_label_rect);
 
-		// oscillator options
-		osc_option_select_rect.y = option_dest.y + osc_option_selected * 8;
-		SDL_RenderCopy(renderer, osc_option_select_texture, NULL, &osc_option_select_rect);
-		SDL_RenderCopy(renderer, osc_options_texture, NULL, &option_dest);
-
-		// waveform draw
-		scope_draw(renderer);
-
-		// process musical keyboard
+		// some stuff is refactored to draw itself LOL
 		musical_keyboard_draw(renderer);
+		osc_options_draw(renderer);
+		scope_draw(renderer);
 
 		// draw mouse
 		if (mouse_knob_grab) {

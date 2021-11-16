@@ -26,7 +26,6 @@ void char_rom_load_set(SDL_Renderer * renderer, unsigned char * set_array) {
 		}
 	}
 	SDL_SetRenderTarget(renderer, stashed_texture);
-	SDL_DestroyTexture(stashed_texture);
 }
 
 void char_rom_set_color(SDL_Color * color) {

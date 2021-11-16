@@ -21,24 +21,6 @@ typedef struct {
 voice voices[NOTE_COUNT];
 
 
-char osc_options[13][16] = {
-	"saw raw",
-	"saw blep",
-	"saw 3sine",
-	"saw 6sine",
-	"saw 9sine",
-	"square raw",
-	"square blep",
-	"square 3sine",
-	"square 6sine",
-	"square 9sine",
-	"tri raw",
-	"tri blep",
-	"noise pitched",
-};
-char osc_option_selected = 1;
-
-
 void voice_freq_init() {
 	for (int i = 0; i < NOTE_COUNT; i++) {
 		voices[i].gate = 0;
