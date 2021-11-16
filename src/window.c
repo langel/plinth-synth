@@ -23,14 +23,14 @@ void window_event_process(SDL_Event event) {
 		if (event.window.event == SDL_WINDOWEVENT_MOVED) {
 			window_rect.x = event.window.data1;
 			window_rect.y = event.window.data2;
-			printf("window position changed: %d x %d\n", window_rect.x, window_rect.y);
+			logout("window position changed: %d x %d", window_rect.x, window_rect.y);
 		}
 		if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
 			window_w = event.window.data1;
 			window_h = event.window.data2;
 			window_rect.w = window_w;
 			window_rect.h = window_h;
-			printf("window size changed: %d x %d\n", window_w, window_h);
+			logout("window size changed: %d x %d", window_w, window_h);
 		}
 	}
 }

@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+
+#define DEBUG 0
 #include "lib/core.c"
 
 #define NOTE_COUNT 25
 #define FREQ_CENTER 440
-#define SAMPLE_RATE 32000
+#define SAMPLE_RATE 132000
 #define KEY_MARGIN 5
 // note A below middle C minus octave(s)
 #define BASE_NOTE -9 - 12
