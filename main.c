@@ -8,7 +8,7 @@
 
 #define NOTE_COUNT 25
 #define FREQ_CENTER 440
-#define SAMPLE_RATE 132000
+#define SAMPLE_RATE 32000
 #define KEY_MARGIN 5
 // note A below middle C minus octave(s)
 #define BASE_NOTE -9 - 12
@@ -168,6 +168,11 @@ int main(int argc, char* args[]) {
 	SDL_SetTextureBlendMode(thiccness_label_texture, SDL_BLENDMODE_BLEND);
 	char_rom_string_to_texture(renderer, thiccness_label_texture, "Thicc");
 	SDL_Texture * thiccness_val_texture = texture_create_generic(renderer, 56, 8);
+
+	FILE * preset = fopen("wow.bin", "r");
+	fread(&thiccness, sizeof(float), 1, preset);
+	fclose(preset);
+	knobs[7].val = thiccness;
 
 	// knob texture
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
@@ -336,5 +341,10 @@ int main(int argc, char* args[]) {
 	SDL_DestroyWindow(window);
 	SDL_CloseAudio();
 	SDL_Quit();
+
+	preset = fopen("wow.bin", "w+");
+	fwrite(&thiccness, sizeof(float), 1, preset);
+	fclose(preset);
+
 	return 0;
 }
