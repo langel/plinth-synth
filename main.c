@@ -35,6 +35,8 @@ int amp_adsr_stage[NOTE_COUNT];
 #include "src/scope.c"
 #include "src/osc_options.c"
 
+char preset_filename[] = "settings.bin";
+
 adsr_envelope filter_adsr;
 
 typedef struct {
@@ -169,10 +171,12 @@ int main(int argc, char* args[]) {
 	char_rom_string_to_texture(renderer, thiccness_label_texture, "Thicc");
 	SDL_Texture * thiccness_val_texture = texture_create_generic(renderer, 56, 8);
 
-	FILE * preset = fopen("wow.bin", "r");
-	fread(&thiccness, sizeof(float), 1, preset);
+	FILE * preset = fopen(preset_filename, "r");
+	for (int i = 0; i < KNOB_COUNT; i++) {
+		fread(&knobs[i].val, sizeof(float), 1, preset);
+	}
+	fread(&osc_option_selected, sizeof(char), 1, preset);
 	fclose(preset);
-	knobs[7].val = thiccness;
 
 	// knob texture
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
@@ -342,8 +346,11 @@ int main(int argc, char* args[]) {
 	SDL_CloseAudio();
 	SDL_Quit();
 
-	preset = fopen("wow.bin", "w+");
-	fwrite(&thiccness, sizeof(float), 1, preset);
+	preset = fopen(preset_filename, "w+");
+	for (int i = 0; i < KNOB_COUNT; i++) {
+		fwrite(&knobs[i].val, sizeof(float), 1, preset);
+	}
+	fwrite(&osc_option_selected, sizeof(char), 1, preset);
 	fclose(preset);
 
 	return 0;
