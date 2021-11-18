@@ -181,8 +181,10 @@ int main(int argc, char* args[]) {
 	// knob texture
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 	SDL_Texture * knob_texture = texture_from_image(renderer, "assets/knob2-smaller.png");
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	for (int i = 0; i < KNOB_COUNT; i++) knob_init(&knobs[i]);
+	// knob emboss texture
+	SDL_Texture * knob_emboss_texture = texture_from_image(renderer, "assets/knob2-smaller-emboss.png");
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
 	// mouse cursor
 	mouse_data mouse = mouse_init();
@@ -237,6 +239,7 @@ int main(int argc, char* args[]) {
 		mouse_osc_select_hover = 0;
 		for (int i = 0; i < KNOB_COUNT; i++) {
 			SDL_RenderCopyEx(renderer, knob_texture, NULL, &knobs[i].rect, knobs[i].rot, NULL, SDL_FLIP_NONE);
+			SDL_RenderCopy(renderer, knob_emboss_texture, NULL, &knobs[i].rect);
 			if (collision_detection(knobs[i].rect, mouse_hotspot)) {
 				mouse_knob_hover = 1;
 				if (!mouse_knob_grab) mouse_knob_target = i;
@@ -253,7 +256,9 @@ int main(int argc, char* args[]) {
 		else if (collision_detection(osc_options_rect, mouse_hotspot)) {
 			mouse_osc_select_hover = 1;
 			if (mouse.button_left) {
-				osc_option_selected = (mouse_hotspot.y - osc_options_rect.y + 3) / 8;
+				int osc_option_row = (mouse_hotspot.y - mouse_hotspot.h - osc_options_rect.y + 4) / 8;
+				if (osc_option_row >= osc_option_count) osc_option_row = osc_option_count - 1;
+				osc_option_selected = osc_visible_options[osc_option_row];
 			}
 		}
 
