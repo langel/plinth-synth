@@ -14,5 +14,6 @@ float osc_helper_blep(float phase, float inc) {
 	return 0.f;
 }
 
+#include "./osc/tables.c"
 #include "./osc/basics.c"
 #include "./osc/noises.c"
