@@ -217,7 +217,7 @@ int main(int argc, char* args[]) {
 
 		// note handling (cornputer keybaord and mouse)
 		for (int i = 0; i < NOTE_COUNT; i++) {
-			if (keys_pressed[note_to_scancode[i]] || (!mouse_knob_grab && keys_mouse_hover && mouse.button_left && keys_mouse_target == i && window_has_focus)) {
+			if (window_has_focus && (keys_pressed[note_to_scancode[i]] || (!mouse_knob_grab && keys_mouse_hover && mouse.button_left && keys_mouse_target == i))) {
 				if (voices[i].gate == 0) {
 					amp_adsr_stage[i] = 0;
 					note_most_recent = i;
@@ -240,7 +240,7 @@ int main(int argc, char* args[]) {
 		for (int i = 0; i < KNOB_COUNT; i++) {
 			SDL_RenderCopyEx(renderer, knob_texture, NULL, &knobs[i].rect, knobs[i].rot, NULL, SDL_FLIP_NONE);
 			SDL_RenderCopy(renderer, knob_emboss_texture, NULL, &knobs[i].rect);
-			if (collision_detection(knobs[i].rect, mouse_hotspot)) {
+			if (window_has_focus && collision_detection(knobs[i].rect, mouse_hotspot)) {
 				mouse_knob_hover = 1;
 				if (!mouse_knob_grab) mouse_knob_target = i;
 			}

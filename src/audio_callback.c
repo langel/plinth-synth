@@ -71,25 +71,25 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 				thicc4 = osc_arcade_32_step(voices[j].thicc4.phase, 0);
 			}
 			else if (osc_option_selected == arcade_32_1) {
-				base   = osc_arcade_32_step(voices[j].base.phase,   1);
-				thicc1 = osc_arcade_32_step(voices[j].thicc1.phase, 1);
-				thicc2 = osc_arcade_32_step(voices[j].thicc2.phase, 1);
-				thicc3 = osc_arcade_32_step(voices[j].thicc3.phase, 1);
-				thicc4 = osc_arcade_32_step(voices[j].thicc4.phase, 1);
+				base   = osc_arcade_32_step_blep(voices[j].base.phase,   voices[j].base.inc,     1);
+				thicc1 = osc_arcade_32_step_blep(voices[j].thicc1.phase, voices[j].thicc1.phase, 1);
+				thicc2 = osc_arcade_32_step_blep(voices[j].thicc2.phase, voices[j].thicc2.phase, 1);
+				thicc3 = osc_arcade_32_step_blep(voices[j].thicc3.phase, voices[j].thicc3.phase, 1);
+				thicc4 = osc_arcade_32_step_blep(voices[j].thicc4.phase, voices[j].thicc4.phase, 1);
 			}
 			else if (osc_option_selected == arcade_32_2) {
-				base   = osc_arcade_32_step(voices[j].base.phase,   2);
-				thicc1 = osc_arcade_32_step(voices[j].thicc1.phase, 2);
-				thicc2 = osc_arcade_32_step(voices[j].thicc2.phase, 2);
-				thicc3 = osc_arcade_32_step(voices[j].thicc3.phase, 2);
-				thicc4 = osc_arcade_32_step(voices[j].thicc4.phase, 2);
+				base   = osc_arcade_32_step_blep(voices[j].base.phase,   voices[j].base.inc,     2);
+				thicc1 = osc_arcade_32_step_blep(voices[j].thicc1.phase, voices[j].thicc1.phase, 2);
+				thicc2 = osc_arcade_32_step_blep(voices[j].thicc2.phase, voices[j].thicc2.phase, 2);
+				thicc3 = osc_arcade_32_step_blep(voices[j].thicc3.phase, voices[j].thicc3.phase, 2);
+				thicc4 = osc_arcade_32_step_blep(voices[j].thicc4.phase, voices[j].thicc4.phase, 2);
 			}
 			else if (osc_option_selected == arcade_32_3) {
-				base   = osc_arcade_32_step(voices[j].base.phase,   3);
-				thicc1 = osc_arcade_32_step(voices[j].thicc1.phase, 3);
-				thicc2 = osc_arcade_32_step(voices[j].thicc2.phase, 3);
-				thicc3 = osc_arcade_32_step(voices[j].thicc3.phase, 3);
-				thicc4 = osc_arcade_32_step(voices[j].thicc4.phase, 3);
+				base   = osc_arcade_32_step_blep(voices[j].base.phase,   voices[j].base.inc,     3);
+				thicc1 = osc_arcade_32_step_blep(voices[j].thicc1.phase, voices[j].thicc1.phase, 3);
+				thicc2 = osc_arcade_32_step_blep(voices[j].thicc2.phase, voices[j].thicc2.phase, 3);
+				thicc3 = osc_arcade_32_step_blep(voices[j].thicc3.phase, voices[j].thicc3.phase, 3);
+				thicc4 = osc_arcade_32_step_blep(voices[j].thicc4.phase, voices[j].thicc4.phase, 3);
 			}
 			else if (osc_option_selected == arcade_32_4) {
 				base   = osc_arcade_32_step(voices[j].base.phase,   4);
