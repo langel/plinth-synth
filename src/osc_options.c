@@ -16,6 +16,8 @@ enum osc_options {
 	arcade_32_5,
 	arcade_32_6,
 	arcade_32_7,
+	arcade_32_1_os,
+	arcade_32_2_os,
 	noise_pitched,
 	saw_raw,
 	saw_blep,
@@ -36,6 +38,7 @@ enum osc_options {
 enum osc_options osc_option_selected = saw_blep;
 
 int osc_visible_options[] = {
+	saw_raw,
 	saw_blep,
 	square_blep,
 	square_6sine,
@@ -43,7 +46,9 @@ int osc_visible_options[] = {
 	sine_raw,
 	sine_ym_lut,
 	arcade_32_1,
+	arcade_32_1_os,
 	arcade_32_2,
+	arcade_32_2_os,
 	arcade_32_3,
 	noise_pitched,
 };
@@ -69,6 +74,8 @@ void osc_options_init(SDL_Renderer * renderer) {
 		[arcade_32_5] = "arcade wave 05",
 		[arcade_32_6] = "arcade wave 06",
 		[arcade_32_7] = "arcade wave 07",
+		[arcade_32_1_os] = "arcade 01 overs",
+		[arcade_32_2_os] = "arcade 02 overs",
 		[noise_pitched] = "noise pitched",
 		[saw_raw] = "sawtooth raw",
 		[saw_blep] = "sawtooth blep",
