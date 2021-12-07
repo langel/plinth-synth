@@ -8,10 +8,11 @@
 
 #define NOTE_COUNT 25
 #define FREQ_CENTER 440
-#define SAMPLE_RATE 32000
+#define SAMPLE_RATE 48000
 #define KEY_MARGIN 5
-// note A below middle C minus octave(s)
-#define BASE_NOTE -9 - 12
+// the C below A's FREQ_CENTER
+// A 440 is octave 4 A
+#define BASE_NOTE -9
 
 unsigned long time_counter = 0;
 
@@ -25,6 +26,10 @@ adsr_envelope amp_adsr;
 float amp_adsr_pos[NOTE_COUNT];
 float amp_adsr_release[NOTE_COUNT];
 int amp_adsr_stage[NOTE_COUNT];
+
+int octave;
+float thiccness;
+float volume;
 
 #include "src/window.c"
 #include "src/mouse.c"
@@ -45,16 +50,13 @@ typedef struct {
 } filter_data;
 filter_data filter;
 
-float volume;
-float thiccness;
-
 float lfo_pos;
 int note_most_recent;
 
 #include "src/audio_callback.c"
 
 
-#define KNOB_COUNT 8
+#define KNOB_COUNT 9
 knob knobs[KNOB_COUNT] = {
 	// ADSR1 attack
 	{ 0.005f, 25.f, 0.f, 0.f, 0.5f, 2.5f,
@@ -80,6 +82,9 @@ knob knobs[KNOB_COUNT] = {
 	// Thiccness
 	{ 0.f, 1.f, 0.f, 0.f, 0.25f, 2.125f,
 		"THICC", { 708, 152, 72, 72 } },
+	// base octave
+	{ 0.f, 8.f, 0.f, 0.f, 2.f, 1.f,
+		"OCTAVE", { 595, 20, 72, 72 } },
 };
 char amp_attack_val_str[8];
 SDL_Rect amp_attack_val_rect = { 18, 100, 56, 8 };
@@ -105,6 +110,9 @@ SDL_Rect volume_label_rect = { 716, 8, 56, 8 };
 char thiccness_val_str[8];
 SDL_Rect thiccness_val_rect = { 716, 228, 56, 8 };
 SDL_Rect thiccness_label_rect = { 716, 136, 56, 8 };
+char octave_val_str[8];
+SDL_Rect octave_val_rect = { 595, 100, 56, 8 };
+SDL_Rect octave_label_rect = { 595, 8, 56, 8 };
 
 
 
@@ -170,6 +178,11 @@ int main(int argc, char* args[]) {
 	SDL_SetTextureBlendMode(thiccness_label_texture, SDL_BLENDMODE_BLEND);
 	char_rom_string_to_texture(renderer, thiccness_label_texture, "Thicc");
 	SDL_Texture * thiccness_val_texture = texture_create_generic(renderer, 56, 8);
+
+	SDL_Texture * octave_label_texture = texture_create_generic(renderer, 56, 8);
+	SDL_SetTextureBlendMode(octave_label_texture, SDL_BLENDMODE_BLEND);
+	char_rom_string_to_texture(renderer, octave_label_texture, "Octave");
+	SDL_Texture * octave_val_texture = texture_create_generic(renderer, 56, 8);
 
 	FILE * preset = fopen(preset_filename, "r");
 	for (int i = 0; i < KNOB_COUNT; i++) {
@@ -313,6 +326,13 @@ int main(int argc, char* args[]) {
 		char_rom_string_to_texture(renderer, thiccness_val_texture, thiccness_val_str);
 		SDL_RenderCopy(renderer, thiccness_val_texture, NULL, &thiccness_val_rect);
 		SDL_RenderCopy(renderer, thiccness_label_texture, NULL, &thiccness_label_rect);
+
+		octave = (int) knobs[8].val;
+		sprintf(octave_val_str, "  %d  ", octave);
+		char_rom_string_to_texture(renderer, octave_val_texture, octave_val_str);
+		SDL_RenderCopy(renderer, octave_val_texture, NULL, &octave_val_rect);
+		SDL_RenderCopy(renderer, octave_label_texture, NULL, &octave_label_rect);
+		voice_freq_update();
 
 		// some stuff is refactored to draw itself LOL
 		musical_keyboard_draw(renderer);

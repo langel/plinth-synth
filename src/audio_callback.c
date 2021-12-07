@@ -119,6 +119,20 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 				thicc3 = osc_arcade_32_step(voices[j].thicc3.phase, 7);
 				thicc4 = osc_arcade_32_step(voices[j].thicc4.phase, 7);
 			}
+			else if (osc_option_selected == arcade_32_1_os) {
+				base   = osc_arcade_32_step_oversamp(voices[j].base.phase,   voices[j].base.inc,     1);
+				thicc1 = osc_arcade_32_step_oversamp(voices[j].thicc1.phase, voices[j].thicc1.phase, 1);
+				thicc2 = osc_arcade_32_step_oversamp(voices[j].thicc2.phase, voices[j].thicc2.phase, 1);
+				thicc3 = osc_arcade_32_step_oversamp(voices[j].thicc3.phase, voices[j].thicc3.phase, 1);
+				thicc4 = osc_arcade_32_step_oversamp(voices[j].thicc4.phase, voices[j].thicc4.phase, 1);
+			}
+			else if (osc_option_selected == arcade_32_2_os) {
+				base   = osc_arcade_32_step_oversamp(voices[j].base.phase,   voices[j].base.inc,     2);
+				thicc1 = osc_arcade_32_step_oversamp(voices[j].thicc1.phase, voices[j].thicc1.phase, 2);
+				thicc2 = osc_arcade_32_step_oversamp(voices[j].thicc2.phase, voices[j].thicc2.phase, 2);
+				thicc3 = osc_arcade_32_step_oversamp(voices[j].thicc3.phase, voices[j].thicc3.phase, 2);
+				thicc4 = osc_arcade_32_step_oversamp(voices[j].thicc4.phase, voices[j].thicc4.phase, 2);
+			}
 			else if (osc_option_selected == saw_raw) {
 				base   = osc_saw(voices[j].base.phase);
 				thicc1 = osc_saw(voices[j].thicc1.phase);
@@ -233,6 +247,11 @@ void audio_callback(void* userdata, uint8_t* byte_stream, int byte_stream_length
 			osc_pos_buf1_l[j] += filter.cutoff * (osc_pos_buf0_l[j] - osc_pos_buf1_l[j]);
 			osc_pos_buf0_r[j] += filter.cutoff * (osc_pos_r - osc_pos_buf0_r[j] + feedback * (osc_pos_buf0_r[j] - osc_pos_buf1_r[j]));
 			osc_pos_buf1_r[j] += filter.cutoff * (osc_pos_buf0_r[j] - osc_pos_buf1_r[j]);
+			/*
+			// filter bypassed
+			osc_pos_buf1_l[j] = osc_pos_l;
+			osc_pos_buf1_r[j] = osc_pos_r;
+			*/
 
 			// apply adsr
 			if (voices[j].gate) {

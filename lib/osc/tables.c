@@ -32,6 +32,11 @@ int osc_lut_arcade_32_step[][32] = {
 };
 
 
+float osc_arcade_32_step(float phase, int waveform) {
+	int step = (int) (phase * 32.f);
+	return ((float) osc_lut_arcade_32_step[waveform][step] / 15.f) * 2.f - 1.f;
+}
+
 float osc_arcade_32_step_blep(float phase, float inc, int waveform) {
 	float thirtysecond = 0.03125f;
 	float step = phase * 32.f;
@@ -41,9 +46,16 @@ float osc_arcade_32_step_blep(float phase, float inc, int waveform) {
 	return out + osc_helper_blep(step_phase, step_inc) * out;
 }
 
-float osc_arcade_32_step(float phase, int waveform) {
-	int step = (int) (phase * 32.f);
-	return ((float) osc_lut_arcade_32_step[waveform][step] / 15.f) * 2.f - 1.f;
+float osc_arcade_32_step_oversamp(float phase, float inc, int waveform) {
+	float one28th = 0.0078125f;
+	float step = phase * 32.f;
+	float step_inc = inc * one28th;
+	float out = 0.f;
+	for (int i = 0; i < 4; i++) {
+		out += ((float) osc_lut_arcade_32_step[waveform][(int) step] / 15.f) * 2.f - 1.f;
+		step += step_inc;
+	}
+	return out * 0.25f;
 }
 
 
